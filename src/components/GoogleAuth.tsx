@@ -1,13 +1,20 @@
 import React from "react";
 import GoogleLogin from 'react-google-login';
 
+interface AccountType {
+    email: string
+    profilePic: string
+}
 
-const GoogleAuth:React.FC<any> = () => {
+interface GoogleAuthType {
+    setAccountInfo: (e: AccountType) => void
+}
+
+const GoogleAuth:React.FC<GoogleAuthType> = ({setAccountInfo}) => {
 
     const responseGoogle = (response: any) => {
         console.log(response.nt.Ad)
-        console.log(response.nt.Wt)
-        console.log(response.profileObj.imageUrl)
+        setAccountInfo({email: response.nt.Wt, profilePic: response.profileObj.imageUrl})
     }
 
     return(

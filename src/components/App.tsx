@@ -10,12 +10,17 @@ interface SingleChatType {
     name: string
 }
 
+interface AccountType {
+    email: string
+    profilePic: string
+}
 
 function App() {
     const [state, setState] = useState<SingleChatType>({name: '', message: ''})
+    const [accountInfo, setAccountInfo] = useState<AccountType>({email: '', profilePic: ''})
     const [chat, setChat] = useState<SingleChatType[]>([])
     const [totalUsers, setTotalUsers] = useState<number>(0)
-    const [loginStatus, setLoginStatus] = useState<boolean>(true)
+    const [loginStatus, setLoginStatus] = useState<boolean>(false)
     const socket = useRef<SocketIOClient.Socket>()
 
     useEffect(() => {
@@ -57,13 +62,12 @@ function App() {
         setState({name, message: ''})
     }
 
-
     const ifAuthenticated = () => {
         if(loginStatus) {
             return (
                 <React.Fragment>
                     <div className="bg-gray-200 h-screen">
-                        <GoogleAuth/>
+                        <GoogleAuth setAccountInfo={setAccountInfo}/>
                     </div>
                 </React.Fragment>
             )
@@ -74,7 +78,7 @@ function App() {
                         <Header props={[totalUsers, state.name]}/>
                     </div>
                     <div className="flex flex-1 flex-col-reverse overflow-y-auto">
-                        <Chat chat={chat}/>
+                        <Chat chat={chat} profilePic={accountInfo.profilePic}/>
                     </div>
                     <Input onTextChange={onTextChange} onMessageSubmit={onMessageSubmit} message={state.message}/>
                 </div>
@@ -82,7 +86,6 @@ function App() {
             )
         }
     }
-
     return(
         <div>
             {ifAuthenticated()}
