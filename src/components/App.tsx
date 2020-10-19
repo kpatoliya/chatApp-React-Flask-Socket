@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 import Chat from './Chat';
 import Header from "./Header";
 import Input from "./Input";
-
+import GoogleAuth from "./GoogleAuth";
 
 interface SingleChatType {
     message: string
@@ -15,10 +15,10 @@ function App() {
     const [state, setState] = useState<SingleChatType>({name: '', message: ''})
     const [chat, setChat] = useState<SingleChatType[]>([])
     const [totalUsers, setTotalUsers] = useState<number>(0)
+    const [loginStatus, setLoginStatus] = useState<boolean>(true)
     const socket = useRef<SocketIOClient.Socket>()
 
     useEffect(() => {
-
         socket.current = io.connect('http://localhost:4000')
         socket.current.on('on_connect', (e: any) => {
             setTotalUsers(e.totalUsers)
@@ -58,17 +58,35 @@ function App() {
     }
 
 
-    return (
-        <div className="flex flex-col h-screen overflow-x-hidden ">
-            <div className="mb-3 bg-gradient-to-b from-gray-900">
-                <Header props={[totalUsers, state.name]}/>
-            </div>
-            <div className="flex flex-1 flex-col-reverse overflow-y-auto" >
-                <Chat chat={chat}/>
-            </div>
-            <Input onTextChange={onTextChange} onMessageSubmit={onMessageSubmit} message={state.message} />
-        </div>
+    const ifAuthenticated = () => {
+        if(loginStatus) {
+            return (
+                <React.Fragment>
+                    <div className="bg-gray-200 h-screen">
+                        <GoogleAuth/>
+                    </div>
+                </React.Fragment>
+            )
+        }else {
+            return (
+                <div className="flex flex-col h-screen overflow-x-hidden ">
+                    <div className="mb-3 bg-gradient-to-b from-gray-900">
+                        <Header props={[totalUsers, state.name]}/>
+                    </div>
+                    <div className="flex flex-1 flex-col-reverse overflow-y-auto">
+                        <Chat chat={chat}/>
+                    </div>
+                    <Input onTextChange={onTextChange} onMessageSubmit={onMessageSubmit} message={state.message}/>
+                </div>
 
+            )
+        }
+    }
+
+    return(
+        <div>
+            {ifAuthenticated()}
+        </div>
     )
 }
 

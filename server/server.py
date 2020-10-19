@@ -47,7 +47,7 @@ class Bot:
         if content['pagination']['total_count'] < 1:
             return 'Invalid Input!!'
         giphy = content['data'][0]['images']['downsized']['url']
-        return "<h4> <img src='" + giphy + "'> </h4>"
+        return "<h4> <img src='" + giphy + "' width='250' height='250'> </h4>"
 
     def funTranslate(self):
         if self.string == 'Please enter text to translate!!':
