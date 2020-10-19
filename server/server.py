@@ -37,7 +37,7 @@ class Bot:
         icon = content['weather'][0]['icon']
         condition = content['weather'][0]['description']
         return "<h4>" + self.string + ": " + str(temperature) + "°F" \
-                            "<img src='http://openweathermap.org/img/w/" + icon + ".png'>" + condition + "</h4>"
+                                                                "<img src='http://openweathermap.org/img/w/" + icon + ".png'>" + condition + "</h4>"
 
     def getGif(self):
         if self.string == 'Please enter valid query!!':
@@ -57,6 +57,12 @@ class Bot:
         retString = content['contents']['translated']
         return retString
 
+    def renderLink(self):
+        if self.string[-4:] == '.jpg' or self.string[-4:] == '.png' or self.string[-4:] == '.gif':
+            return "<h4> <img src='" + self.string + "' width='250' height='250'> </h4>"
+        else:
+            return "<a href='" + self.string + "'> Click the Link </a>"
+
     @staticmethod
     def genRandomJoke():
         content = json.loads(requests.get('https://sv443.net/jokeapi/v2/joke/Programming?type=single').text)
@@ -70,13 +76,12 @@ def handle_message(msg):
     db_message = models.Messages(msg['name'], msg['message'], msg['email'], msg['profilePic'])
     db.session.add(db_message)
     db.session.commit()
-
+    socketio.emit('message_sent', {'message': msg, 'totalUsers': len(totalUsers)})
     message = msg['message'].strip()
-
+    profilePic = './static/chatbot.png'
     if message.split(" ")[0] == '!!':
         name = 'Bot'
         messageSet = ''
-        socketio.emit('message_sent', {'message': msg, 'totalUsers': len(totalUsers)})
         msgArray = re.split("\s", message, 2)
 
         if msgArray[1] == 'weather':
@@ -85,7 +90,8 @@ def handle_message(msg):
             except IndexError as error:
                 messageSet = Bot('Please enter city name!!').getWeather()
             socketio.emit('message_sent',
-                          {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': len(totalUsers)})
+                          {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': './static/chatbot.png'},
+                           'totalUsers': len(totalUsers)})
         elif msgArray[1] == 'gif':
             try:
                 messageSet = Bot(msgArray[2]).getGif()
@@ -95,7 +101,7 @@ def handle_message(msg):
                           {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': len(totalUsers)})
         elif msgArray[1] == 'help':
             messageSet = 'Working Prefixes: <br>!! about<br>!! weather --City Name' \
-                          '<br>!! gif --Query <br> !! funtranslate --String to translate<br>!! randomjoke'
+                         '<br>!! gif --Query <br> !! funtranslate --String to translate<br>!! randomjoke'
             socketio.emit('message_sent',
                           {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': len(totalUsers)},
                           room=socketId)
@@ -117,13 +123,19 @@ def handle_message(msg):
                           {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': len(totalUsers)})
         else:
             messageSet = "Command Not Recognized!!"
-            socketio.emit('message_sent', {'message':  {'name': 'Bot', 'message': messageSet},
+            socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': messageSet},
                                            'totalUsers': len(totalUsers)})
-        db_message = models.Messages(name, messageSet)
+        db_message = models.Messages(name, messageSet, '', profilePic)
         db.session.add(db_message)
         db.session.commit()
-    else:
-        socketio.emit('message_sent', {'message': msg, 'totalUsers': len(totalUsers)})
+    elif message[:8] == 'https://':
+        link = Bot(message).renderLink()
+        socketio.emit('message_sent',
+                      {'message': {'name': 'Bot', 'message': link,
+                                   'profilePic': './static/chatbot.png'}})
+        db_message = models.Messages('Bot', link, '', profilePic)
+        db.session.add(db_message)
+        db.session.commit()
 
 
 @socketio.on('update_total_users')
@@ -171,6 +183,7 @@ def hello():
 
 if __name__ == '__main__':
     import models
+
     models.db.create_all()
     socketio.run(
         app,
