@@ -76,9 +76,11 @@ def handle_message(msg):
     db_message = models.Messages(msg['name'], msg['message'], msg['email'], msg['profilePic'])
     db.session.add(db_message)
     db.session.commit()
+
     socketio.emit('message_sent', {'message': msg, 'totalUsers': len(totalUsers)})
     message = msg['message'].strip()
-    profilePic = './static/chatbot.png'
+    profilePic = 'https://raw.githubusercontent.com/kpatoliya/kmps-petclinic/master/chatbot.jpg'
+
     if message.split(" ")[0] == '!!':
         name = 'Bot'
         messageSet = ''
@@ -89,50 +91,40 @@ def handle_message(msg):
                 messageSet = Bot(msgArray[2]).getWeather()
             except IndexError as error:
                 messageSet = Bot('Please enter city name!!').getWeather()
-            socketio.emit('message_sent',
-                          {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': './static/chatbot.png'},
-                           'totalUsers': len(totalUsers)})
+            socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
         elif msgArray[1] == 'gif':
             try:
                 messageSet = Bot(msgArray[2]).getGif()
             except IndexError as error:
                 messageSet = Bot('Please enter valid query!!').getGif()
-            socketio.emit('message_sent',
-                          {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': len(totalUsers)})
+            socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
         elif msgArray[1] == 'help':
             messageSet = 'Working Prefixes: <br>!! about<br>!! weather --City Name' \
                          '<br>!! gif --Query <br> !! funtranslate --String to translate<br>!! randomjoke'
             socketio.emit('message_sent',
-                          {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': len(totalUsers)},
-                          room=socketId)
+                          {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
         elif msgArray[1] == 'about':
             messageSet = "Hello! I'm Bot.<br>To learn more about my abilities type: !! help"
-            socketio.emit('message_sent',
-                          {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': len(totalUsers)},
-                          room=socketId)
+            socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
         elif msgArray[1] == 'funtranslate':
             try:
                 messageSet = Bot(msgArray[2]).funTranslate()
             except IndexError as error:
                 messageSet = Bot('Please enter text to translate!!').funTranslate()
-            socketio.emit('message_sent',
-                          {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': len(totalUsers)})
+            socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
         elif msgArray[1] == 'randomjoke':
             messageSet = Bot.genRandomJoke()
-            socketio.emit('message_sent',
-                          {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': len(totalUsers)})
+            socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
         else:
             messageSet = "Command Not Recognized!!"
-            socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': messageSet},
-                                           'totalUsers': len(totalUsers)})
+            socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
+
         db_message = models.Messages(name, messageSet, '', profilePic)
         db.session.add(db_message)
         db.session.commit()
     elif message[:8] == 'https://':
         link = Bot(message).renderLink()
-        socketio.emit('message_sent',
-                      {'message': {'name': 'Bot', 'message': link,
-                                   'profilePic': './static/chatbot.png'}})
+        socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': link, 'profilePic': profilePic}})
         db_message = models.Messages('Bot', link, '', profilePic)
         db.session.add(db_message)
         db.session.commit()
@@ -146,7 +138,6 @@ def update_users(email):
     all_messages = db.session.query(models.Messages).all()
     for message in all_messages:
         messagesArray.append({"name": message.user_name, "message": message.text, "profilePic": message.profilePic})
-    print('Someone connected!')
     socketio.emit('on_connect', {'messages': messagesArray, 'sid': socketId}, room=socketId)
 
     sockets[socketId] = email
@@ -154,8 +145,8 @@ def update_users(email):
         totalUsers[email] += 1
     else:
         totalUsers[email] = 1
-    print(sockets)
-    print(totalUsers)
+
+    print('Someone connected!')
     socketio.emit('update_users', {'totalUsers': len(totalUsers)})
 
 
@@ -170,8 +161,7 @@ def on_disconnect():
         totalUsers[removeEmail] -= 1
     else:
         del totalUsers[removeEmail]
-    print(sockets)
-    print(totalUsers)
+
     print('Someone disconnected!')
     socketio.emit('on_disconnect', {'totalUsers': len(totalUsers)})
 

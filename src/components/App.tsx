@@ -40,7 +40,6 @@ function App() {
         })
 
         Socket.on('message_sent', (e: any) => {
-            setTotalUsers(e.totalUsers)
             const {name, message, email, profilePic} = e.message
             return setChat(prevChat => [...prevChat, {name, message, profilePic}]);
         })
