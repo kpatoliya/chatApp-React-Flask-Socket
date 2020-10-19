@@ -5,14 +5,14 @@ import parse from 'html-react-parser';
 interface SingleChatType {
     message: string
     name: string
+    profilePic: string
 }
 
 interface ChatType {
     chat: SingleChatType[]
-    profilePic: string
 }
 
-const Chat: React.FC<ChatType> = ({chat, profilePic}) => {
+const Chat: React.FC<ChatType> = ({chat}) => {
 
     return (
         <div className="h-auto">
@@ -21,7 +21,7 @@ const Chat: React.FC<ChatType> = ({chat, profilePic}) => {
                     <div className="flex p-2 flex-col inline-flex mb-3 max-w-md border-opacity-0 rounded-lg
                         overflow-y-auto bg-gradient-to-r from-gray-700">
                         <div className="flex space-x-2">
-                            <img className="w-8 h-8" src={profilePic} alt="profile pic"/>
+                            <img className="w-8 h-8" src={singleChat.profilePic} alt="profile pic"/>
                             <div
                                 className="h-auto font-extrabold text-white text-md mr-2 font-sans">{singleChat.name}</div>
                         </div>

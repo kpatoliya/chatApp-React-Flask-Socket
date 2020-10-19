@@ -6,7 +6,6 @@ import requests
 from flask import render_template, request
 from flask_socketio import SocketIO
 from dotenv import load_dotenv
-from random_username.generate import generate_username
 from flask_sqlalchemy import SQLAlchemy
 
 load_dotenv()
@@ -19,7 +18,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 db = SQLAlchemy(app)
 db.app = app
 socketio = SocketIO(app, cors_allowed_origins='*')
-totalUsers = 0
+totalUsers = {}
+sockets = {}
 
 
 class Bot:
@@ -67,7 +67,7 @@ class Bot:
 def handle_message(msg):
     global totalUsers
     socketId = request.sid
-    db_message = models.Messages(msg['name'], msg['message'])
+    db_message = models.Messages(msg['name'], msg['message'], msg['email'], msg['profilePic'])
     db.session.add(db_message)
     db.session.commit()
 
@@ -76,7 +76,7 @@ def handle_message(msg):
     if message.split(" ")[0] == '!!':
         name = 'Bot'
         messageSet = ''
-        socketio.emit('message_sent', {'message': msg, 'totalUsers': totalUsers})
+        socketio.emit('message_sent', {'message': msg, 'totalUsers': len(totalUsers)})
         msgArray = re.split("\s", message, 2)
 
         if msgArray[1] == 'weather':
@@ -85,24 +85,24 @@ def handle_message(msg):
             except IndexError as error:
                 messageSet = Bot('Please enter city name!!').getWeather()
             socketio.emit('message_sent',
-                          {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': totalUsers})
+                          {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': len(totalUsers)})
         elif msgArray[1] == 'gif':
             try:
                 messageSet = Bot(msgArray[2]).getGif()
             except IndexError as error:
                 messageSet = Bot('Please enter valid query!!').getGif()
             socketio.emit('message_sent',
-                          {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': totalUsers})
+                          {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': len(totalUsers)})
         elif msgArray[1] == 'help':
             messageSet = 'Working Prefixes: <br>!! about<br>!! weather --City Name' \
                           '<br>!! gif --Query <br> !! funtranslate --String to translate<br>!! randomjoke'
             socketio.emit('message_sent',
-                          {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': totalUsers},
+                          {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': len(totalUsers)},
                           room=socketId)
         elif msgArray[1] == 'about':
             messageSet = "Hello! I'm Bot.<br>To learn more about my abilities type: !! help"
             socketio.emit('message_sent',
-                          {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': totalUsers},
+                          {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': len(totalUsers)},
                           room=socketId)
         elif msgArray[1] == 'funtranslate':
             try:
@@ -110,44 +110,58 @@ def handle_message(msg):
             except IndexError as error:
                 messageSet = Bot('Please enter text to translate!!').funTranslate()
             socketio.emit('message_sent',
-                          {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': totalUsers})
+                          {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': len(totalUsers)})
         elif msgArray[1] == 'randomjoke':
             messageSet = Bot.genRandomJoke()
             socketio.emit('message_sent',
-                          {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': totalUsers})
+                          {'message': {'name': 'Bot', 'message': messageSet}, 'totalUsers': len(totalUsers)})
         else:
             messageSet = "Command Not Recognized!!"
             socketio.emit('message_sent', {'message':  {'name': 'Bot', 'message': messageSet},
-                                           'totalUsers': totalUsers})
+                                           'totalUsers': len(totalUsers)})
         db_message = models.Messages(name, messageSet)
         db.session.add(db_message)
         db.session.commit()
     else:
-        socketio.emit('message_sent', {'message': msg, 'totalUsers': totalUsers})
+        socketio.emit('message_sent', {'message': msg, 'totalUsers': len(totalUsers)})
 
 
-@socketio.on('connect')
-def on_connect():
-    global totalUsers
+@socketio.on('update_total_users')
+def update_users(email):
+    global totalUsers, sockets
     messagesArray = []
+    socketId = request.sid
     all_messages = db.session.query(models.Messages).all()
     for message in all_messages:
-        messagesArray.append({"name": message.user_name, "message": message.text})
-    userName = generate_username()[0]
-    socketId = request.sid
-    totalUsers += 1
+        messagesArray.append({"name": message.user_name, "message": message.text, "profilePic": message.profilePic})
     print('Someone connected!')
-    socketio.emit('on_connect', {'totalUsers': totalUsers, 'userName': userName, 'messages': messagesArray},
-                  room=socketId)
-    socketio.emit('update_users', {'totalUsers': totalUsers})
+    socketio.emit('on_connect', {'messages': messagesArray, 'sid': socketId}, room=socketId)
+
+    sockets[socketId] = email
+    if email in totalUsers:
+        totalUsers[email] += 1
+    else:
+        totalUsers[email] = 1
+    print(sockets)
+    print(totalUsers)
+    socketio.emit('update_users', {'totalUsers': len(totalUsers)})
 
 
 @socketio.on('disconnect')
 def on_disconnect():
+    global sockets
+    socketId = request.sid
+    removeEmail = sockets.get(socketId)
+    del sockets[socketId]
     global totalUsers
-    totalUsers -= 1
+    if totalUsers.get(removeEmail) > 1:
+        totalUsers[removeEmail] -= 1
+    else:
+        del totalUsers[removeEmail]
+    print(sockets)
+    print(totalUsers)
     print('Someone disconnected!')
-    socketio.emit('on_disconnect', {'totalUsers': totalUsers})
+    socketio.emit('on_disconnect', {'totalUsers': len(totalUsers)})
 
 
 @app.route('/')

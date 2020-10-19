@@ -1,55 +1,59 @@
-import React, {useEffect, useRef, useState} from 'react';
-import io from 'socket.io-client';
+import React, {useEffect, useState} from 'react';
+import Socket from './Socket';
 import Chat from './Chat';
 import Header from "./Header";
 import Input from "./Input";
 import GoogleAuth from "./GoogleAuth";
 
-interface SingleChatType {
+interface stateType {
     message: string
     name: string
 }
-
+interface SingleChatType {
+    message: string
+    name: string
+    profilePic: string
+}
 interface AccountType {
     email: string
     profilePic: string
 }
 
 function App() {
-    const [state, setState] = useState<SingleChatType>({name: '', message: ''})
+    const [state, setState] = useState<stateType>({name: '', message: ''})
     const [accountInfo, setAccountInfo] = useState<AccountType>({email: '', profilePic: ''})
     const [chat, setChat] = useState<SingleChatType[]>([])
     const [totalUsers, setTotalUsers] = useState<number>(0)
-    const [loginStatus, setLoginStatus] = useState<boolean>(false)
-    const socket = useRef<SocketIOClient.Socket>()
+    const [loginStatus, setLoginStatus] = useState<boolean>( true)
+    const [sid, setSid] = useState<string>('')
 
     useEffect(() => {
-        socket.current = io.connect('http://localhost:4000')
-        socket.current.on('on_connect', (e: any) => {
-            setTotalUsers(e.totalUsers)
-            setState({name: e.userName, message: ''})
+        console.log('hi')
+
+        Socket.on('on_connect', (e: any) => {
             setChat(e.messages)
+            setSid(e.sid)
         })
 
-        socket.current.on('update_users', (e: any) => {
+        Socket.on('update_users', (e: any) => {
             setTotalUsers(e.totalUsers)
         })
 
-        socket.current.on('message_sent', (e: any) => {
+        Socket.on('message_sent', (e: any) => {
             setTotalUsers(e.totalUsers)
-            const {name, message} = e.message
-            return setChat(prevChat => [...prevChat, {name, message}]);
+            const {name, message, email, profilePic} = e.message
+            return setChat(prevChat => [...prevChat, {name, message, profilePic}]);
         })
 
-        socket.current.on('on_disconnect', (e: any) => {
+        Socket.on('on_disconnect', (e: any) => {
             setTotalUsers(e.totalUsers)
         })
 
         return () => {
-              socket.current && socket.current.removeAllListeners()
+              Socket && Socket.removeAllListeners()
           }
 
-    }, [])
+    },[])
 
     const onTextChange = (message: string) => {
         setState({name: state.name, message: message})
@@ -58,7 +62,8 @@ function App() {
     const onMessageSubmit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault()
         const {name, message} = state
-        socket.current && socket.current.emit('message', {name, message})
+        const {email, profilePic} = accountInfo
+        Socket.emit('message', {name, message, email, profilePic})
         setState({name, message: ''})
     }
 
@@ -67,7 +72,7 @@ function App() {
             return (
                 <React.Fragment>
                     <div className="bg-gray-200 h-screen">
-                        <GoogleAuth setAccountInfo={setAccountInfo}/>
+                        <GoogleAuth setAccountInfo={setAccountInfo} setLoginStatus={setLoginStatus} setState={setState}/>
                     </div>
                 </React.Fragment>
             )
@@ -78,11 +83,10 @@ function App() {
                         <Header props={[totalUsers, state.name]}/>
                     </div>
                     <div className="flex flex-1 flex-col-reverse overflow-y-auto">
-                        <Chat chat={chat} profilePic={accountInfo.profilePic}/>
+                        <Chat chat={chat} />
                     </div>
                     <Input onTextChange={onTextChange} onMessageSubmit={onMessageSubmit} message={state.message}/>
                 </div>
-
             )
         }
     }
