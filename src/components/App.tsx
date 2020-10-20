@@ -4,6 +4,7 @@ import Chat from './Chat';
 import Header from "./Header";
 import Input from "./Input";
 import GoogleAuth from "./GoogleAuth";
+import FacebookAuth from "./FacebookAuth";
 
 interface stateType {
     message: string
@@ -28,7 +29,6 @@ function App() {
     const [sid, setSid] = useState<string>('')
 
     useEffect(() => {
-        console.log('hi')
 
         Socket.on('on_connect', (e: any) => {
             setChat(e.messages)
@@ -70,8 +70,12 @@ function App() {
         if(loginStatus) {
             return (
                 <React.Fragment>
-                    <div className="bg-gray-200 h-screen">
-                        <GoogleAuth setAccountInfo={setAccountInfo} setLoginStatus={setLoginStatus} setState={setState}/>
+                    <div className="bg-gray-200 w-screen h-screen flex justify-center items-center">
+                        <div className="w-1/3 justify-center">
+                            <h1 className="font-hairline mb-6 font-extrabold text-4xl text-left">Login to ChatApp</h1>
+                            <GoogleAuth setAccountInfo={setAccountInfo} setLoginStatus={setLoginStatus} setState={setState}/>
+                            <FacebookAuth setAccountInfo={setAccountInfo} setLoginStatus={setLoginStatus} setState={setState}/>
+                        </div>
                     </div>
                 </React.Fragment>
             )

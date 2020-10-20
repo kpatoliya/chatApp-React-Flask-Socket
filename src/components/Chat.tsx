@@ -13,7 +13,6 @@ interface ChatType {
 }
 
 const Chat: React.FC<ChatType> = ({chat}) => {
-    console.log(chat)
     return (
         <div className="h-auto">
             {chat.map((singleChat, index) => (

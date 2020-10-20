@@ -1,12 +1,11 @@
-import json
 import os
 import re
 import flask
-import requests
 from flask import render_template, request
 from flask_socketio import SocketIO
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
+from bot import Bot
 
 load_dotenv()
 WEATHER_API_KEY = os.getenv('WEATHER_API')
@@ -22,66 +21,25 @@ totalUsers = {}
 sockets = {}
 
 
-class Bot:
-    def __init__(self, string):
-        self.string = string
-
-    def getWeather(self):
-        if self.string == 'Please enter city name!!':
-            return self.string
-        content = json.loads(requests.get('http://api.openweathermap.org/data/2.5/weather?q=' + self.string +
-                                          '&units=imperial&appid=' + WEATHER_API_KEY).text)
-        if content['cod'] != 200:
-            return 'Invalid Input!!'
-        temperature = content['main']['temp']
-        icon = content['weather'][0]['icon']
-        condition = content['weather'][0]['description']
-        return "<h4>" + self.string + ": " + str(temperature) + "°F" \
-                                                                "<img src='http://openweathermap.org/img/w/" + icon + ".png'>" + condition + "</h4>"
-
-    def getGif(self):
-        if self.string == 'Please enter valid query!!':
-            return self.string
-        content = json.loads(requests.get('https://api.giphy.com/v1/gifs/search?api_key=' + GIPHY_API_KEY +
-                                          '&q=' + self.string + '&limit=1&offset=0&rating=r&lang=en').text)
-        if content['pagination']['total_count'] < 1:
-            return 'Invalid Input!!'
-        giphy = content['data'][0]['images']['downsized']['url']
-        return "<h4> <img src='" + giphy + "' width='250' height='250'> </h4>"
-
-    def funTranslate(self):
-        if self.string == 'Please enter text to translate!!':
-            return self.string
-        content = json.loads(requests.get('https://api.funtranslations.com/translate/emoji.json?text='
-                                          + self.string).text)
-        retString = content['contents']['translated']
-        return retString
-
-    def renderLink(self):
-        if self.string[-4:] == '.jpg' or self.string[-4:] == '.png' or self.string[-4:] == '.gif':
-            return "<h4> <img src='" + self.string + "' width='250' height='250'> </h4>"
-        else:
-            return "<a href='" + self.string + "'> Click the Link </a>"
-
-    @staticmethod
-    def genRandomJoke():
-        content = json.loads(requests.get('https://sv443.net/jokeapi/v2/joke/Programming?type=single').text)
-        return content['joke']
-
-
 @socketio.on('message')
 def handle_message(msg):
     global totalUsers
-    socketId = request.sid
-    db_message = models.Messages(msg['name'], msg['message'], msg['email'], msg['profilePic'])
-    db.session.add(db_message)
-    db.session.commit()
 
-    socketio.emit('message_sent', {'message': msg, 'totalUsers': len(totalUsers)})
     message = msg['message'].strip()
     profilePic = 'https://raw.githubusercontent.com/kpatoliya/kmps-petclinic/master/chatbot.jpg'
+    regex = re.compile(
+        r'^(?:http|ftp)s?://'  # http:// or https://
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
+        r'localhost|'  # localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
+        r'(?::\d+)?'  # optional port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
 
     if message.split(" ")[0] == '!!':
+        db_message = models.Messages(msg['name'], msg['message'], msg['email'], msg['profilePic'])
+        db.session.add(db_message)
+        db.session.commit()
+
         name = 'Bot'
         messageSet = ''
         msgArray = re.split("\s", message, 2)
@@ -122,10 +80,23 @@ def handle_message(msg):
         db_message = models.Messages(name, messageSet, '', profilePic)
         db.session.add(db_message)
         db.session.commit()
-    elif message[:8] == 'https://':
-        link = Bot(message).renderLink()
-        socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': link, 'profilePic': profilePic}})
-        db_message = models.Messages('Bot', link, '', profilePic)
+    elif re.match(regex, message):
+        link = ''
+        if message[-4:] == '.jpg' or message[-4:] == '.png' or message[-4:] == '.gif':
+            link = Bot(message).renderLink()
+            socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': link, 'profilePic': profilePic}})
+            db_message = models.Messages('Bot', link, '', profilePic)
+            db.session.add(db_message)
+            db.session.commit()
+        else:
+            link = "<u> <a href='" + message + "'>" + message + "</a></u>"
+            socketio.emit('message_sent', {'message': {'name': msg['name'], 'message': link, 'profilePic': msg['profilePic']}})
+            db_message = models.Messages(msg['name'], link, msg['email'], msg['profilePic'])
+            db.session.add(db_message)
+            db.session.commit()
+    else:
+        socketio.emit('message_sent', {'message': msg, 'totalUsers': len(totalUsers)})
+        db_message = models.Messages(msg['name'], msg['message'], msg['email'], msg['profilePic'])
         db.session.add(db_message)
         db.session.commit()
 
