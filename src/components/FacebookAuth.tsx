@@ -19,6 +19,7 @@ interface FacebookAuthType {
 const FacebookAuth:React.FC<FacebookAuthType> = ({setAccountInfo, setLoginStatus, setState}) => {
 
     const responseFacebook = (response: any) => {
+        console.log(response.status)
         setLoginStatus( false)
         setState({name: response.name, message: ''})
         setAccountInfo({email: response.email, profilePic: response.picture.data.url})
