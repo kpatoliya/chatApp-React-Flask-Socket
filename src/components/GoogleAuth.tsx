@@ -21,17 +21,18 @@ interface GoogleAuthType {
 const GoogleAuth:React.FC<GoogleAuthType> = ({setAccountInfo, setLoginStatus, setState}) => {
 
     const responseGoogle = (response: any) => {
+        console.log(response)
         setLoginStatus( false)
-        setState({name: response.nt.Ad, message: ''})
-        setAccountInfo({email: response.nt.Wt, profilePic: response.profileObj.imageUrl})
-        Socket.emit('update_total_users', response.nt.Wt)
+        setState({name: response.profileObj.givenName, message: ''})
+        setAccountInfo({email: response.profileObj.email, profilePic: response.profileObj.imageUrl})
+        Socket.emit('update_total_users', response.profileObj.email)
     }
 
 
     return(
         <div className="align-middle">
             <GoogleLogin
-            clientId="955471402983-3ij9nsbi3gsds15h189e6nnnj7tpguud.apps.googleusercontent.com"
+            clientId="955471402983-pei3u5jmjvjq6uiruv8dv4mdlch9ebig.apps.googleusercontent.com"
             buttonText="Login"
             onSuccess={responseGoogle}
             cookiePolicy={'single_host_origin'} >
