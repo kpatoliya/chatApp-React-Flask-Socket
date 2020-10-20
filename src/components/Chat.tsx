@@ -5,14 +5,20 @@ import parse from 'html-react-parser';
 interface SingleChatType {
     message: string
     name: string
+    email: string
     profilePic: string
 }
-
+interface stateType {
+    message: string
+    name: string
+}
 interface ChatType {
     chat: SingleChatType[]
+    state: stateType
 }
 
-const Chat: React.FC<ChatType> = ({chat}) => {
+const Chat: React.FC<ChatType> = ({chat, state}) => {
+
     return (
         <div className="h-auto">
             {chat.map((singleChat, index) => (

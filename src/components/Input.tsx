@@ -9,11 +9,13 @@ interface InputType {
 const Input: React.FC<InputType> = ({onTextChange, onMessageSubmit, message}) => {
 
     const onSubmit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        onMessageSubmit(e)
+        if(message !== ''){
+            onMessageSubmit(e)
+        }
     }
 
     const handleKeyPress = (e: any) => {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && message !== '') {
             onMessageSubmit(e)
         }
     }
@@ -30,7 +32,7 @@ const Input: React.FC<InputType> = ({onTextChange, onMessageSubmit, message}) =>
                    placeholder="Message to #general"
                    value={message}
                    onChange={onChange}
-                   onKeyPress={handleKeyPress}/>
+                   onKeyPress={handleKeyPress} required/>
         </div>
     )
 }

@@ -3,8 +3,7 @@ import Socket from './Socket';
 import Chat from './Chat';
 import Header from "./Header";
 import Input from "./Input";
-import GoogleAuth from "./GoogleAuth";
-import FacebookAuth from "./FacebookAuth";
+import Login from "./Login";
 
 interface stateType {
     message: string
@@ -13,6 +12,7 @@ interface stateType {
 interface SingleChatType {
     message: string
     name: string
+    email: string
     profilePic: string
 }
 interface AccountType {
@@ -26,13 +26,11 @@ function App() {
     const [chat, setChat] = useState<SingleChatType[]>([])
     const [totalUsers, setTotalUsers] = useState<number>(0)
     const [loginStatus, setLoginStatus] = useState<boolean>( true)
-    const [sid, setSid] = useState<string>('')
 
     useEffect(() => {
 
         Socket.on('on_connect', (e: any) => {
             setChat(e.messages)
-            setSid(e.sid)
         })
 
         Socket.on('update_users', (e: any) => {
@@ -41,7 +39,7 @@ function App() {
 
         Socket.on('message_sent', (e: any) => {
             const {name, message, email, profilePic} = e.message
-            return setChat(prevChat => [...prevChat, {name, message, profilePic}]);
+            return setChat(prevChat => [...prevChat, {name, message, email, profilePic}]);
         })
 
         Socket.on('on_disconnect', (e: any) => {
@@ -69,15 +67,7 @@ function App() {
     const ifAuthenticated = () => {
         if(loginStatus) {
             return (
-                <React.Fragment>
-                    <div className="bg-gray-200 w-screen h-screen flex justify-center items-center">
-                        <div className="w-1/3 justify-center">
-                            <h1 className="font-hairline mb-6 font-extrabold text-4xl text-left">Login to ChatApp</h1>
-                            <GoogleAuth setAccountInfo={setAccountInfo} setLoginStatus={setLoginStatus} setState={setState}/>
-                            <FacebookAuth setAccountInfo={setAccountInfo} setLoginStatus={setLoginStatus} setState={setState}/>
-                        </div>
-                    </div>
-                </React.Fragment>
+                <Login setAccountInfo={setAccountInfo} setLoginStatus={setLoginStatus} setState={setState} />
             )
         }else {
             return (
@@ -86,7 +76,7 @@ function App() {
                         <Header props={[totalUsers, state.name]}/>
                     </div>
                     <div className="flex flex-1 flex-col-reverse overflow-y-auto">
-                        <Chat chat={chat} />
+                        <Chat chat={chat} state={state}/>
                     </div>
                     <Input onTextChange={onTextChange} onMessageSubmit={onMessageSubmit} message={state.message}/>
                 </div>

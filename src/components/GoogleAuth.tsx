@@ -21,7 +21,6 @@ interface GoogleAuthType {
 const GoogleAuth:React.FC<GoogleAuthType> = ({setAccountInfo, setLoginStatus, setState}) => {
 
     const responseGoogle = (response: any) => {
-        console.log(response.nt.Ad)
         setLoginStatus( false)
         setState({name: response.nt.Ad, message: ''})
         setAccountInfo({email: response.nt.Wt, profilePic: response.profileObj.imageUrl})
@@ -36,8 +35,7 @@ const GoogleAuth:React.FC<GoogleAuthType> = ({setAccountInfo, setLoginStatus, se
             buttonText="Login"
             onSuccess={responseGoogle}
             cookiePolicy={'single_host_origin'} >
-            <FontAwesome
-                name='google' />
+            <FontAwesome name='google' />
             <span> Login with Google</span>
             </GoogleLogin>
         </div>

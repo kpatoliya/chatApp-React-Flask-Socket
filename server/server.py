@@ -21,25 +21,28 @@ totalUsers = {}
 sockets = {}
 
 
+def addToDb(name, message, email, profilePic):
+    db_message = models.Messages(name, message, email, profilePic)
+    db.session.add(db_message)
+    db.session.commit()
+
+
 @socketio.on('message')
 def handle_message(msg):
     global totalUsers
 
     message = msg['message'].strip()
     profilePic = 'https://raw.githubusercontent.com/kpatoliya/kmps-petclinic/master/chatbot.jpg'
-    regex = re.compile(
-        r'^(?:http|ftp)s?://'  # http:// or https://
-        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
-        r'localhost|'  # localhost...
-        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
-        r'(?::\d+)?'  # optional port
-        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+    regex = re.compile(r'^(?:http|ftp)s?://'  # http:// or https://
+                       r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
+                       r'localhost|'  # localhost...
+                       r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
+                       r'(?::\d+)?'  # optional port
+                       r'(?:/?|[/?]\S+)$', re.IGNORECASE)
 
     if message.split(" ")[0] == '!!':
-        db_message = models.Messages(msg['name'], msg['message'], msg['email'], msg['profilePic'])
-        db.session.add(db_message)
-        db.session.commit()
-
+        addToDb(msg['name'], msg['message'], msg['email'], msg['profilePic'])
+        socketio.emit('message_sent', {'message': msg})
         name = 'Bot'
         messageSet = ''
         msgArray = re.split("\s", message, 2)
@@ -62,7 +65,7 @@ def handle_message(msg):
             socketio.emit('message_sent',
                           {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
         elif msgArray[1] == 'about':
-            messageSet = "Hello! I'm Bot.<br>To learn more about my abilities type: !! help"
+            messageSet = "Hello! I'm Bot.<br>To learn more about my abilities type:<br>!! help"
             socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
         elif msgArray[1] == 'funtranslate':
             try:
@@ -76,29 +79,23 @@ def handle_message(msg):
         else:
             messageSet = "Command Not Recognized!!"
             socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
+        addToDb(name, messageSet, '', profilePic)
 
-        db_message = models.Messages(name, messageSet, '', profilePic)
-        db.session.add(db_message)
-        db.session.commit()
     elif re.match(regex, message):
         link = ''
         if message[-4:] == '.jpg' or message[-4:] == '.png' or message[-4:] == '.gif':
             link = Bot(message).renderLink()
             socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': link, 'profilePic': profilePic}})
-            db_message = models.Messages('Bot', link, '', profilePic)
-            db.session.add(db_message)
-            db.session.commit()
+            addToDb('Bot', link, '', profilePic)
         else:
             link = "<u> <a href='" + message + "'>" + message + "</a></u>"
-            socketio.emit('message_sent', {'message': {'name': msg['name'], 'message': link, 'profilePic': msg['profilePic']}})
-            db_message = models.Messages(msg['name'], link, msg['email'], msg['profilePic'])
-            db.session.add(db_message)
-            db.session.commit()
+            socketio.emit('message_sent',
+                          {'message': {'name': msg['name'], 'message': link, 'profilePic': msg['profilePic']}})
+            addToDb(msg['name'], link, msg['email'], msg['profilePic'])
+
     else:
-        socketio.emit('message_sent', {'message': msg, 'totalUsers': len(totalUsers)})
-        db_message = models.Messages(msg['name'], msg['message'], msg['email'], msg['profilePic'])
-        db.session.add(db_message)
-        db.session.commit()
+        socketio.emit('message_sent', {'message': msg})
+        addToDb(msg['name'], msg['message'], msg['email'], msg['profilePic'])
 
 
 @socketio.on('update_total_users')
@@ -109,7 +106,7 @@ def update_users(email):
     all_messages = db.session.query(models.Messages).all()
     for message in all_messages:
         messagesArray.append({"name": message.user_name, "message": message.text, "profilePic": message.profilePic})
-    socketio.emit('on_connect', {'messages': messagesArray, 'sid': socketId}, room=socketId)
+    socketio.emit('on_connect', {'messages': messagesArray}, room=socketId)
 
     sockets[socketId] = email
     if email in totalUsers:
