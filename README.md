@@ -5,8 +5,9 @@
 ## Requirements
 - NodeJS 12.14 (minimum)
 - Python 3.7 (minimum)
-- To run this project we need API keys for weather which we can get by signing up into
- open weather api at this [link](https://home.openweathermap.org/api_keys)
+- To run this project we need API keys for weather and giphy 
+    - get weather api at this [link](https://home.openweathermap.org/api_keys) by signing up
+    - get giphy api at this [link](https://developers.giphy.com/dashboard/) by signing up
 - Docker for local database integration (optional)
 
 ## Installation
@@ -29,14 +30,24 @@ POSTGRES_DB=key
 POSTGRES_PASSWORD=key
 DATABASE_URL=postgresql://POSTGRES_USER:POSTGRES_PASSWORD@localhost/POSTGRES_DB
 WEATHER_API=key
+GIPHY_API=key
 ```
+#### Setting up OAuth
+- Google Auth <br/>
+Follow this [link](https://developers.google.com/adwords/api/docs/guides/authentication#webapp) to get client ID<br />
+Paste this Client ID in file GoogleAuth.tsx<br/>
+```<GoogleLogin clientId="YOUR_CLIENT_ID" />```
 
+- Facebook Auth <br/>
+Follow this [link](https://developers.facebook.com/apps) to get client ID by creating a new app<br />
+Paste this Client ID in file FacebookAuth.tsx<br/>
+```<FacebookLogin clientId="YOUR_CLIENT_ID" />```
 
 ## Running Locally
 
 - Start React app in development mode
     ```
-   npm start
+    npm start
     ```
    
     The page will reload if you make edits.<br />
@@ -51,34 +62,36 @@ WEATHER_API=key
     
 - Running docker for database
     ```
-      docker-compose up -d
-  ```
+    docker-compose up 
+   ```
   This command would spin up the the container that has our database.
+  
 
 ## Deploy to Heroku
 - Follow this [step](https://devcenter.heroku.com/articles/creating-apps) to create a project in Heroku
 - Procfile is the configuration needed for Heroku.
 - Create a Postgres Database on Heroku, [instructions here](https://devcenter.heroku.com/articles/heroku-postgresql)
 - To deploy your application, [follow this](https://devcenter.heroku.com/articles/git)
-- Set ```WEATHER_API``` Config Variable in your Heroku app's console.
+- Set ```WEATHER_API``` & ```GIPHY_API``` Config Variable in your Heroku app's console.
 
  ## Issues
- - I was having the issue in styling where my messages were staking up in reverse order and overlapping the header part.
-    I fixed this issue by wrapping the the chat part with div and using `flex-col-reverse overflow-y-auto`
+ - I was using ```@socketio.on('connect')``` initially which didn't allow me to get email from auth login and using other method 
+    was making duplicate codes which was redundant, so I ended up replacing the method with ```@socketio.on('update_total_users')```
+    and emitting from auth component so that every time login is successful the state get set to updated values. 
      
- - I was having the issue of users online not updating. So for example, when a new user connects the first user don't get updated
- number of online users. I added a socket listeners to send updated list of users online to everyone. So everytime the new user connects
- the state gets updated for everyone rather than just the new user.
+ - I was having the issue of input field not setting as required even after explicitly defining the input tag as required
+    so I solved this issue by handling the function that is called at the time of submit.
     ```
-    socket.current.on('update_users', (e: any) => {
-            setTotalUsers(e.totalUsers)
-        })
+    if(message !== ''){
+            onMessageSubmit(e)
+        }
     ```
- - I wanted to display emoji's that I got from funtranslate api call. I was getting those emoji in text format on my app which 
- I solved by using the this library `html-react-parser`. I used this [documentation](https://www.npmjs.com/package/html-react-parser)
- to solve this issue.
+ - Displaying gif and image when user inputs the link was displaying image with variable size. So I made this easy 
+ using the this library `html-react-parser`. With this library I can just explicitly mention size of the image tag like
+ ```<img src='" + giphy + "' width='250' height='250'>``` and return to frontend. 
+ I used this [documentation](https://www.npmjs.com/package/html-react-parser) to solve this issue.
  
- 
+  
  ## Known Problems
  - None
  
