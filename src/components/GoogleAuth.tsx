@@ -23,7 +23,7 @@ const GoogleAuth:React.FC<GoogleAuthType> = ({setAccountInfo, setLoginStatus, se
     const responseGoogle = (response: any) => {
         console.log(response)
         setLoginStatus( false)
-        setState({name: response.profileObj.givenName, message: ''})
+        setState({name: response.profileObj.name, message: ''})
         setAccountInfo({email: response.profileObj.email, profilePic: response.profileObj.imageUrl})
         Socket.emit('update_total_users', response.profileObj.email)
     }
