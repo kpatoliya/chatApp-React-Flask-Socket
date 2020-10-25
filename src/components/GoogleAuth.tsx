@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react';
 import GoogleLogin from 'react-google-login';
-import Socket from "./Socket";
-import FontAwesome from "react-fontawesome";
+import FontAwesome from 'react-fontawesome';
+import Socket from './Socket';
 
 interface AccountType {
     email: string
@@ -18,28 +18,27 @@ interface GoogleAuthType {
     setState: (e: SingleChatType) => void
 }
 
-const GoogleAuth:React.FC<GoogleAuthType> = ({setAccountInfo, setLoginStatus, setState}) => {
+const GoogleAuth:React.FC<GoogleAuthType> = ({ setAccountInfo, setLoginStatus, setState }) => {
+  const responseGoogle = (response: any) => {
+    console.log(response);
+    setLoginStatus(false);
+    setState({ name: response.profileObj.name, message: '' });
+    setAccountInfo({ email: response.profileObj.email, profilePic: response.profileObj.imageUrl });
+    Socket.emit('update_total_users', response.profileObj.email);
+  };
 
-    const responseGoogle = (response: any) => {
-        console.log(response)
-        setLoginStatus( false)
-        setState({name: response.profileObj.name, message: ''})
-        setAccountInfo({email: response.profileObj.email, profilePic: response.profileObj.imageUrl})
-        Socket.emit('update_total_users', response.profileObj.email)
-    }
-
-
-    return(
-        <div className="align-middle">
-            <GoogleLogin
-            clientId="955471402983-pei3u5jmjvjq6uiruv8dv4mdlch9ebig.apps.googleusercontent.com"
-            buttonText="Login"
-            onSuccess={responseGoogle}
-            cookiePolicy={'single_host_origin'} >
-            <FontAwesome name='google' />
-            <span> Login with Google</span>
-            </GoogleLogin>
-        </div>
-    )
-}
+  return (
+    <div className="align-middle">
+      <GoogleLogin
+        clientId="955471402983-pei3u5jmjvjq6uiruv8dv4mdlch9ebig.apps.googleusercontent.com"
+        buttonText="Login"
+        onSuccess={responseGoogle}
+        cookiePolicy="single_host_origin"
+      >
+        <FontAwesome name="google" />
+        <span> Login with Google</span>
+      </GoogleLogin>
+    </div>
+  );
+};
 export default GoogleAuth;

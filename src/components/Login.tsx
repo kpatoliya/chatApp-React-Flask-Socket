@@ -1,6 +1,6 @@
-import React from "react";
-import FacebookAuth from "./FacebookAuth";
-import GoogleAuth from "./GoogleAuth";
+import React from 'react';
+import FacebookAuth from './FacebookAuth';
+import GoogleAuth from './GoogleAuth';
 
 interface AccountType {
     email: string
@@ -16,19 +16,24 @@ interface LoginType {
     setState: (e: SingleChatType) => void
 }
 
-const Login:React.FC<LoginType> = ({setAccountInfo, setLoginStatus, setState}) => {
-
-    return(
-        <React.Fragment>
-            <div className="bg-gray-200 w-screen h-screen flex flex-col justify-center items-center">
-                <h1 className="font-hairline mb-6 font-extrabold text-4xl text-left">Login to ChatApp</h1>
-                <div className="flex-col flex ">
-                    <GoogleAuth setAccountInfo={setAccountInfo} setLoginStatus={setLoginStatus} setState={setState}/>
-                    <FacebookAuth setAccountInfo={setAccountInfo} setLoginStatus={setLoginStatus} setState={setState}/>
-                </div>
-            </div>
-        </React.Fragment>
-    )
-}
+const Login:React.FC<LoginType> = ({ setAccountInfo, setLoginStatus, setState }) => (
+  <>
+    <div className="bg-gray-200 w-screen h-screen flex flex-col justify-center items-center">
+      <h1 className="font-hairline mb-6 font-extrabold text-4xl text-left">Login to ChatApp</h1>
+      <div className="flex-col flex ">
+        <GoogleAuth
+          setAccountInfo={setAccountInfo}
+          setLoginStatus={setLoginStatus}
+          setState={setState}
+        />
+        <FacebookAuth
+          setAccountInfo={setAccountInfo}
+          setLoginStatus={setLoginStatus}
+          setState={setState}
+        />
+      </div>
+    </div>
+  </>
+);
 
 export default Login;

@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface InputType {
     onTextChange: (message: string) => void
@@ -6,35 +6,39 @@ interface InputType {
     message: string
 }
 
-const Input: React.FC<InputType> = ({onTextChange, onMessageSubmit, message}) => {
-
-    const onSubmit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        if(message !== ''){
-            onMessageSubmit(e)
-        }
+const Input: React.FC<InputType> = ({ onTextChange, onMessageSubmit, message }) => {
+  const onSubmit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    if (message !== '') {
+      onMessageSubmit(e);
     }
+  };
 
-    const handleKeyPress = (e: any) => {
-        if (e.key === 'Enter' && message !== '') {
-            onMessageSubmit(e)
-        }
+  const handleKeyPress = (e: any) => {
+    if (e.key === 'Enter' && message !== '') {
+      onMessageSubmit(e);
     }
+  };
 
-    const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        onTextChange(e.target.value)
-    }
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onTextChange(e.target.value);
+  };
 
-    return (
-        <div className="flex w-full m-2 justify-center rounded-lg border-2 border-grey-600 ">
-            <button className="hover:bg-gray-200 text-3xl text-grey bg-gray-300 px-3 border-r-2" onClick={onSubmit}>+
-            </button>
-            <input type="text" className="w-full mr-4 p-4 bg-gray-300 focus:bg-white"
-                   placeholder="Message to #general"
-                   value={message}
-                   onChange={onChange}
-                   onKeyPress={handleKeyPress} required/>
-        </div>
-    )
-}
+  return (
+    <div className="flex w-full m-2 justify-center rounded-lg border-2 border-grey-600 ">
+      <button type="button" className="hover:bg-gray-200 text-3xl text-grey bg-gray-300 px-3 border-r-2" onClick={onSubmit}>
+        +
+      </button>
+      <input
+        type="text"
+        className="w-full mr-4 p-4 bg-gray-300 focus:bg-white"
+        placeholder="Message to #general"
+        value={message}
+        onChange={onChange}
+        onKeyPress={handleKeyPress}
+        required
+      />
+    </div>
+  );
+};
 
-export default Input
+export default Input;
