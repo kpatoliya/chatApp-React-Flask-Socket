@@ -1,7 +1,6 @@
 import unittest
 from bot import Bot
 import models
-import server
 
 
 class UnmockedTestCase(unittest.TestCase):
@@ -33,8 +32,13 @@ class UnmockedTestCase(unittest.TestCase):
         expected = "Hello! I'm Bot.<br>To learn more about my abilities type:<br>!! help"
         self.assertEqual(Bot.botAbout(), expected)
 
+    def test_bot_renderImage(self):
+        expected = "<h4> <img src='" + 'https://www.picture.jpg' + "' width='250' height='250'> </h4>"
+        self.assertEqual(Bot('https://www.picture.jpg').renderImage(), expected)
+
     def test_bot_renderLink(self):
-        expected = "<h4> <img src='" + 'https://www.picture.com' + "' width='250' height='250'> </h4>"
+        message = 'https://www.picture.com'
+        expected = "<u> <a href='" + message + "'>" + message + "</a></u>"
         self.assertEqual(Bot('https://www.picture.com').renderLink(), expected)
 
     def test_bot_get_weather_error(self):
@@ -49,8 +53,9 @@ class UnmockedTestCase(unittest.TestCase):
         expected = 'Please enter text to translate!!'
         self.assertEqual(Bot('Please enter text to translate!!').funTranslate(), expected)
 
-
-
+    def test_bot_invalid_bot_command(self):
+        expected = 'Command Not Recognized!!'
+        self.assertEqual(Bot.botCommandInvalid(), expected)
 
 
 if __name__ == '__main__':

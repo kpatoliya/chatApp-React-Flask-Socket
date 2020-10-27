@@ -78,20 +78,19 @@ def handle_message(msg):
             messageSet = Bot.genRandomJoke()
             socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
         else:
-            messageSet = "Command Not Recognized!!"
+            messageSet = Bot.botCommandInvalid()
             socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
         addToDb(name, messageSet, '', profilePic)
 
     elif re.match(regex, message):
         link = ''
         if message[-4:] == '.jpg' or message[-4:] == '.png' or message[-4:] == '.gif':
-            link = Bot(message).renderLink()
+            link = Bot(message).renderImage()
             socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': link, 'profilePic': profilePic}})
             addToDb('Bot', link, '', profilePic)
         else:
-            link = "<u> <a href='" + message + "'>" + message + "</a></u>"
-            socketio.emit('message_sent',
-                          {'message': {'name': msg['name'], 'message': link, 'profilePic': msg['profilePic']}})
+            link = Bot(message).renderLink()
+            socketio.emit('message_sent', {'message': {'name': msg['name'], 'message': link, 'profilePic': msg['profilePic']}})
             addToDb(msg['name'], link, msg['email'], msg['profilePic'])
 
     else:

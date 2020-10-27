@@ -43,8 +43,11 @@ class Bot:
         retString = content['contents']['translated']
         return retString
 
-    def renderLink(self):
+    def renderImage(self):
         return "<h4> <img src='" + self.string + "' width='250' height='250'> </h4>"
+
+    def renderLink(self):
+        return "<u> <a href='" + self.string + "'>" + self.string + "</a></u>"
 
     @staticmethod
     def genRandomJoke():
@@ -58,4 +61,8 @@ class Bot:
     @staticmethod
     def botHelp():
         return 'Working Prefixes: <br>!! about<br>!! weather --City Name' \
-                     '<br>!! gif --Query <br> !! funtranslate --String to translate<br>!! randomjoke'
+               '<br>!! gif --Query <br> !! funtranslate --String to translate<br>!! randomjoke'
+
+    @staticmethod
+    def botCommandInvalid():
+        return "Command Not Recognized!!"

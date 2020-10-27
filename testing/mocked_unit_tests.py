@@ -1,9 +1,8 @@
 import unittest
 import unittest.mock as mock
 from bot import Bot
-from flask import render_template, request
 import models
-from server import socketio, app, sockets, totalUsers, handle_message, addToDb, update_users, on_disconnect
+from server import socketio, app, handle_message
 
 
 class MockedDbQuery:
@@ -101,7 +100,7 @@ class MockedTestCase(unittest.TestCase):
         res = socketio_test_client.disconnect()
         self.assertEqual(res, None)
 
-    def test_sever_message_if_bot(self):
+    def test_sever_message_if_not_help_options(self):
         with mock.patch('server.addToDb', return_value=True):
             res = handle_message({
                 "name": 'karan',
@@ -109,9 +108,9 @@ class MockedTestCase(unittest.TestCase):
                 "email": 'karan@gmail.com',
                 "profilePic": 'test_photo.com'
             })
-            self.assertTrue(True, res)
+            self.assertEqual(res, None)
         with mock.patch('server.addToDb', return_value=True):
-            with mock.patch('server.Bot.renderLink') as getBot:
+            with mock.patch('server.Bot.renderImage') as getBot:
                 getBot.return_value = 'https://wwww.image.jpg'
                 res = handle_message({
                     "name": 'karan',
@@ -119,24 +118,17 @@ class MockedTestCase(unittest.TestCase):
                     "email": 'karan@gmail.com',
                     "profilePic": 'test_photo.com'
                 })
-                self.assertTrue(True, res)
+                self.assertEqual(res, None)
         with mock.patch('server.addToDb', return_value=True):
-            getBot.return_value = 'https://wwww.image.com'
-            res = handle_message({
-                "name": 'karan',
-                "message": 'https://wwww.image.com',
-                "email": 'karan@gmail.com',
-                "profilePic": 'test_photo.com'
-            })
-            self.assertTrue(True, res)
-        with mock.patch('server.addToDb', return_value=True):
-            res = handle_message({
-                "name": 'karan',
-                "message": '!! invalid',
-                "email": 'karan@gmail.com',
-                "profilePic": 'test_photo.com'
-            })
-            self.assertTrue(True, res)
+            with mock.patch('server.Bot.renderLink') as getBot:
+                getBot.return_value = 'https://wwww.image.com'
+                res = handle_message({
+                    "name": 'karan',
+                    "message": 'https://wwww.image.com',
+                    "email": 'karan@gmail.com',
+                    "profilePic": 'test_photo.com'
+                })
+            self.assertEqual(res, None)
 
     def test_server_for_weather_bot(self):
         with mock.patch('server.addToDb', return_value=True):
@@ -149,7 +141,7 @@ class MockedTestCase(unittest.TestCase):
                         "email": 'karan@gmail.com',
                         "profilePic": 'test_photo.com'
                     })
-                    self.assertTrue(True, res)
+                    self.assertEqual(res, None)
 
     def test_server_for_gif_bot(self):
         with mock.patch('server.addToDb', return_value=True):
@@ -162,7 +154,7 @@ class MockedTestCase(unittest.TestCase):
                         "email": 'karan@gmail.com',
                         "profilePic": 'test_photo.com'
                     })
-                    self.assertTrue(True, res)
+                    self.assertEqual(res, None)
 
     def test_server_for_funtranslate_bot(self):
         with mock.patch('server.addToDb', return_value=True):
@@ -175,7 +167,7 @@ class MockedTestCase(unittest.TestCase):
                         "email": 'karan@gmail.com',
                         "profilePic": 'test_photo.com'
                     })
-                    self.assertTrue(True, res)
+                    self.assertEqual(res, None)
 
     def test_server_for_randomjoke_bot(self):
         with mock.patch('server.addToDb', return_value=True):
@@ -187,7 +179,7 @@ class MockedTestCase(unittest.TestCase):
                     "email": 'karan@gmail.com',
                     "profilePic": 'test_photo.com'
                 })
-                self.assertTrue(True, res)
+                self.assertEqual(res, None)
 
 
 if __name__ == '__main__':
