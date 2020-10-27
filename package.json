@@ -26,11 +26,12 @@
     "react-scripts": "3.4.3",
     "socket.io-client": "^2.3.1",
     "tailwindcss": "^1.8.10",
-    "typescript": "~3.7.2"
+    "typescript": "~3.7.2",
+    "eslint": "^6.6.0"
   },
   "scripts": {
     "start": "react-scripts start",
-    "dev": "python server/server.py",
+    "dev": "python server.py",
     "build": "npm run build:css && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",

@@ -6,14 +6,16 @@ from flask_socketio import SocketIO
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 from bot import Bot
+import models
 
 load_dotenv()
-WEATHER_API_KEY = os.getenv('WEATHER_API')
-GIPHY_API_KEY = os.getenv('GIPHY_API')
-database_url = os.getenv('DATABASE_URL')
+
 
 app = flask.Flask(__name__)
+database_url = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
 db.app = app
 socketio = SocketIO(app, cors_allowed_origins='*')
@@ -60,12 +62,11 @@ def handle_message(msg):
                 messageSet = Bot('Please enter valid query!!').getGif()
             socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
         elif msgArray[1] == 'help':
-            messageSet = 'Working Prefixes: <br>!! about<br>!! weather --City Name' \
-                         '<br>!! gif --Query <br> !! funtranslate --String to translate<br>!! randomjoke'
+            messageSet = Bot.botHelp()
             socketio.emit('message_sent',
                           {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
         elif msgArray[1] == 'about':
-            messageSet = "Hello! I'm Bot.<br>To learn more about my abilities type:<br>!! help"
+            messageSet = Bot.botAbout()
             socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
         elif msgArray[1] == 'funtranslate':
             try:
@@ -113,8 +114,6 @@ def update_users(email):
         totalUsers[email] += 1
     else:
         totalUsers[email] = 1
-
-    print('Someone connected!')
     socketio.emit('update_users', {'totalUsers': len(totalUsers)})
 
 
@@ -129,8 +128,6 @@ def on_disconnect():
         totalUsers[removeEmail] -= 1
     else:
         del totalUsers[removeEmail]
-
-    print('Someone disconnected!')
     socketio.emit('on_disconnect', {'totalUsers': len(totalUsers)})
 
 
@@ -140,8 +137,6 @@ def hello():
 
 
 if __name__ == '__main__':
-    import models
-
     models.db.create_all()
     socketio.run(
         app,

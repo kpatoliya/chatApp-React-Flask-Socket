@@ -50,3 +50,12 @@ class Bot:
     def genRandomJoke():
         content = json.loads(requests.get('https://sv443.net/jokeapi/v2/joke/Programming?type=single').text)
         return content['joke']
+
+    @staticmethod
+    def botAbout():
+        return "Hello! I'm Bot.<br>To learn more about my abilities type:<br>!! help"
+
+    @staticmethod
+    def botHelp():
+        return 'Working Prefixes: <br>!! about<br>!! weather --City Name' \
+                     '<br>!! gif --Query <br> !! funtranslate --String to translate<br>!! randomjoke'
