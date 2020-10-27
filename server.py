@@ -1,3 +1,4 @@
+"""server.py"""
 import os
 import re
 import flask
@@ -9,7 +10,6 @@ from bot import Bot
 import models
 
 load_dotenv()
-
 
 app = flask.Flask(__name__)
 database_url = os.getenv('DATABASE_URL')
@@ -24,6 +24,7 @@ sockets = {}
 
 
 def addToDb(name, message, email, profilePic):
+    """function to add to database"""
     db_message = models.Messages(name, message, email, profilePic)
     db.session.add(db_message)
     db.session.commit()
@@ -31,12 +32,13 @@ def addToDb(name, message, email, profilePic):
 
 @socketio.on('message')
 def handle_message(msg):
-    global totalUsers
+    """function to handle message"""
 
     message = msg['message'].strip()
     profilePic = 'https://raw.githubusercontent.com/kpatoliya/kmps-petclinic/master/chatbot.jpg'
     regex = re.compile(r'^(?:http|ftp)s?://'  # http:// or https://
-                       r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
+                       r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)'
+                       r'+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
                        r'localhost|'  # localhost...
                        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
                        r'(?::\d+)?'  # optional port
@@ -47,50 +49,58 @@ def handle_message(msg):
         socketio.emit('message_sent', {'message': msg})
         name = 'Bot'
         messageSet = ''
-        msgArray = re.split("\s", message, 2)
+        msgArray = re.split(r"\s", message, 2)
 
         if msgArray[1] == 'weather':
             try:
                 messageSet = Bot(msgArray[2]).getWeather()
-            except IndexError as error:
+            except IndexError:
                 messageSet = Bot('Please enter city name!!').getWeather()
-            socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
+            socketio.emit('message_sent', {'message': {
+                'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
         elif msgArray[1] == 'gif':
             try:
                 messageSet = Bot(msgArray[2]).getGif()
-            except IndexError as error:
+            except IndexError:
                 messageSet = Bot('Please enter valid query!!').getGif()
-            socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
+            socketio.emit('message_sent', {'message': {
+                'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
         elif msgArray[1] == 'help':
             messageSet = Bot.botHelp()
-            socketio.emit('message_sent',
-                          {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
+            socketio.emit('message_sent', {'message': {
+                'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
         elif msgArray[1] == 'about':
             messageSet = Bot.botAbout()
-            socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
+            socketio.emit('message_sent', {'message': {
+                'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
         elif msgArray[1] == 'funtranslate':
             try:
                 messageSet = Bot(msgArray[2]).funTranslate()
-            except IndexError as error:
+            except IndexError:
                 messageSet = Bot('Please enter text to translate!!').funTranslate()
-            socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
+            socketio.emit('message_sent', {'message': {
+                'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
         elif msgArray[1] == 'randomjoke':
             messageSet = Bot.genRandomJoke()
-            socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
+            socketio.emit('message_sent', {'message': {
+                'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
         else:
             messageSet = Bot.botCommandInvalid()
-            socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
+            socketio.emit('message_sent', {'message': {
+                'name': 'Bot', 'message': messageSet, 'profilePic': profilePic}})
         addToDb(name, messageSet, '', profilePic)
 
     elif re.match(regex, message):
         link = ''
         if message[-4:] == '.jpg' or message[-4:] == '.png' or message[-4:] == '.gif':
             link = Bot(message).renderImage()
-            socketio.emit('message_sent', {'message': {'name': 'Bot', 'message': link, 'profilePic': profilePic}})
+            socketio.emit('message_sent', {'message': {
+                'name': 'Bot', 'message': link, 'profilePic': profilePic}})
             addToDb('Bot', link, '', profilePic)
         else:
             link = Bot(message).renderLink()
-            socketio.emit('message_sent', {'message': {'name': msg['name'], 'message': link, 'profilePic': msg['profilePic']}})
+            socketio.emit('message_sent', {'message': {
+                'name': msg['name'], 'message': link, 'profilePic': msg['profilePic']}})
             addToDb(msg['name'], link, msg['email'], msg['profilePic'])
 
     else:
@@ -100,12 +110,13 @@ def handle_message(msg):
 
 @socketio.on('update_total_users')
 def update_users(email):
-    global totalUsers, sockets
+    """function to handle on connection"""
     messagesArray = []
     socketId = request.sid
     all_messages = db.session.query(models.Messages).all()
     for message in all_messages:
-        messagesArray.append({"name": message.user_name, "message": message.text, "profilePic": message.profilePic})
+        messagesArray.append({"name": message.user_name,
+                              "message": message.text, "profilePic": message.profilePic})
     socketio.emit('on_connect', {'messages': messagesArray}, room=socketId)
 
     sockets[socketId] = email
@@ -118,11 +129,10 @@ def update_users(email):
 
 @socketio.on('disconnect')
 def on_disconnect():
-    global sockets
+    """function to handle disconnection"""
     socketId = request.sid
     removeEmail = sockets.get(socketId)
     del sockets[socketId]
-    global totalUsers
     if totalUsers.get(removeEmail) > 1:
         totalUsers[removeEmail] -= 1
     else:
@@ -132,6 +142,7 @@ def on_disconnect():
 
 @app.route('/')
 def hello():
+    """function to render main page"""
     return render_template('index.html')
 
 

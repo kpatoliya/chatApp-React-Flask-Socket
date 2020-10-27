@@ -1,23 +1,25 @@
+"""models.py"""
 from server import db
 
 
 class Messages(db.Model):
+    """Class to initialize the message table for database"""
     id = db.Column(db.Integer, primary_key=True)
     user_name = db.Column(db.String(120))
     text = db.Column(db.Text)
     email = db.Column(db.Text)
-    profile_pic = db.Column(db.Text)
+    profilePic = db.Column(db.Text)
 
-    def __init__(self, user_name, text, email, profile_pic):
+    def __init__(self, user_name, text, email, profilePic):
         self.user_name = user_name
         self.text = text
         self.email = email
-        self.profile_pic = profile_pic
+        self.profilePic = profilePic
 
     def __repr__(self):
         return str({
             'userId': self.user_name,
             'body': self.text,
             'email': self.email,
-            'profilePic': self.profile_pic
+            'profilePic': self.profilePic
         })
