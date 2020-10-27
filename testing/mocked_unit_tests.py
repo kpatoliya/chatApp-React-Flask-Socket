@@ -86,6 +86,50 @@ class MockedTestCase(unittest.TestCase):
             expected = "generated random joke"
             self.assertEqual(Bot.genRandomJoke(), expected)
 
+    def test_socketio(self):
+        flask_test_client = app.test_client()
+        socketio_test_client = socketio.test_client(app, flask_test_client=flask_test_client)
+        self.assertTrue(socketio_test_client.is_connected())
+        with mock.patch('models.db.session') as mock_messages:
+            mock_messages.query.return_value.all.return_value = [MockedDbQuery(
+                'karan',
+                'test text',
+                'test_photo.com'
+            )]
+            socketio_test_client.emit('update_total_users', 'karan@gmail.com')
+            socketio_test_client.emit('update_total_users', 'karan@gmail.com')
+        res = socketio_test_client.disconnect()
+        self.assertEqual(res, None)
+
+    def test_sever_message_if_bot(self):
+        with mock.patch('server.addToDb', return_value=True):
+            res = handle_message({
+                "name": 'karan',
+                "message": 'test message',
+                "email": 'karan@gmail.com',
+                "profilePic": 'test_photo.com'
+            })
+            self.assertTrue(True, res)
+        with mock.patch('server.addToDb', return_value=True):
+            with mock.patch('server.Bot.renderLink') as getBot:
+                getBot.return_value = 'https://wwww.image.jpg'
+                res = handle_message({
+                    "name": 'karan',
+                    "message": 'https://wwww.image.jpg',
+                    "email": 'karan@gmail.com',
+                    "profilePic": 'test_photo.com'
+                })
+                self.assertTrue(True, res)
+        with mock.patch('server.addToDb', return_value=True):
+            getBot.return_value = 'https://wwww.image.com'
+            res = handle_message({
+                "name": 'karan',
+                "message": 'https://wwww.image.com',
+                "email": 'karan@gmail.com',
+                "profilePic": 'test_photo.com'
+            })
+            self.assertTrue(True, res)
+
 
 if __name__ == '__main__':
     unittest.main()
