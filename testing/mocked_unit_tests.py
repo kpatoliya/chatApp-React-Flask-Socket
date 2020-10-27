@@ -129,6 +129,61 @@ class MockedTestCase(unittest.TestCase):
                 "profilePic": 'test_photo.com'
             })
             self.assertTrue(True, res)
+        with mock.patch('server.addToDb', return_value=True):
+            res = handle_message({
+                "name": 'karan',
+                "message": '!! invalid',
+                "email": 'karan@gmail.com',
+                "profilePic": 'test_photo.com'
+            })
+            self.assertTrue(True, res)
+
+    def test_server_for_weather_bot(self):
+        with mock.patch('server.Bot.getWeather') as getBot:
+            getBot.return_value = 'weather details'
+            for message in ['!! weather newark', '!! weather']:
+                res = handle_message({
+                    "name": 'karan',
+                    "message": message,
+                    "email": 'karan@gmail.com',
+                    "profilePic": 'test_photo.com'
+                })
+                self.assertTrue(True, res)
+
+    def test_server_for_gif_bot(self):
+        with mock.patch('server.Bot.getGif') as getBot:
+            getBot.return_value = 'gif details'
+            for message in ['!! gif hello', '!! gif']:
+                res = handle_message({
+                    "name": 'karan',
+                    "message": message,
+                    "email": 'karan@gmail.com',
+                    "profilePic": 'test_photo.com'
+                })
+                self.assertTrue(True, res)
+
+    def test_server_for_funtranslate_bot(self):
+        with mock.patch('server.Bot.funTranslate') as getBot:
+            getBot.return_value = 'translated text'
+            for message in ['!! funtranslate text', '!! funtranslate']:
+                res = handle_message({
+                    "name": 'karan',
+                    "message": message,
+                    "email": 'karan@gmail.com',
+                    "profilePic": 'test_photo.com'
+                })
+                self.assertTrue(True, res)
+
+    def test_server_for_randomjoke_bot(self):
+        with mock.patch('server.Bot.genRandomJoke') as getBot:
+            getBot.return_value = 'joke'
+            res = handle_message({
+                "name": 'karan',
+                "message": '!! randomjoke',
+                "email": 'karan@gmail.com',
+                "profilePic": 'test_photo.com'
+            })
+            self.assertTrue(True, res)
 
 
 if __name__ == '__main__':
