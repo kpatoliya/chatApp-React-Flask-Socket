@@ -40,4 +40,5 @@ const Chat: React.FC<ChatType> = ({ chat, state }: ChatType) => (
     ))}
   </div>
 );
+
 export default Chat;
