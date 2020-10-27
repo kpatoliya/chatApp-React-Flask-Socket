@@ -18,9 +18,10 @@ interface GoogleAuthType {
     setState: (e: SingleChatType) => void
 }
 
-const GoogleAuth:React.FC<GoogleAuthType> = ({ setAccountInfo, setLoginStatus, setState }) => {
+const GoogleAuth:React.FC<GoogleAuthType> = (
+  { setAccountInfo, setLoginStatus, setState }: GoogleAuthType,
+) => {
   const responseGoogle = (response: any) => {
-    console.log(response);
     setLoginStatus(false);
     setState({ name: response.profileObj.name, message: '' });
     setAccountInfo({ email: response.profileObj.email, profilePic: response.profileObj.imageUrl });

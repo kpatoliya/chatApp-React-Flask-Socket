@@ -11,7 +11,6 @@ GIPHY_API_KEY = os.getenv('GIPHY_API')
 
 class Bot:
     """This is a function to handle messages for bot"""
-
     def __init__(self, string):
         self.string = string
 

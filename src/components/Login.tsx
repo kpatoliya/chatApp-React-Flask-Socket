@@ -16,7 +16,7 @@ interface LoginType {
     setState: (e: SingleChatType) => void
 }
 
-const Login:React.FC<LoginType> = ({ setAccountInfo, setLoginStatus, setState }) => (
+const Login:React.FC<LoginType> = ({ setAccountInfo, setLoginStatus, setState }: LoginType) => (
   <>
     <div className="bg-gray-200 w-screen h-screen flex flex-col justify-center items-center">
       <h1 className="font-hairline mb-6 font-extrabold text-4xl text-left">Login to ChatApp</h1>

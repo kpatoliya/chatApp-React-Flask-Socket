@@ -4,8 +4,9 @@ interface HeaderType {
     props: [number, string]
 }
 
-const Header: React.FC<HeaderType> = ({ props }) => (
-
+const Header: React.FC<HeaderType> = ({ props }: HeaderType) => (
+/* eslint-disable react/prop-types */
+/* eslint-disable react/destructuring-assignment */
   <div className="flex flex-row place-items-auto items-center">
     <div className="flex-1 p-3 m-3 font-serif text-white text-xl font-extrabold">
       #general

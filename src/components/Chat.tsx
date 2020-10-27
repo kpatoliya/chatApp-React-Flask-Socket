@@ -17,7 +17,7 @@ interface ChatType {
     state: stateType
 }
 
-const Chat: React.FC<ChatType> = ({ chat, state }) => (
+const Chat: React.FC<ChatType> = ({ chat, state }: ChatType) => (
   <div className="h-auto">
     {chat.map((singleChat) => (
       <div className="m-4">

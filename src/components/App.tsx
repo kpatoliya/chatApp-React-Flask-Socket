@@ -48,7 +48,7 @@ function App() {
     Socket.on('on_disconnect', (e: any) => {
       setTotalUsers(e.totalUsers);
     });
-
+    /* eslint-disable no-unused-expressions */
     return () => {
       Socket && Socket.removeAllListeners();
     };
@@ -71,7 +71,11 @@ function App() {
   const ifAuthenticated = () => {
     if (loginStatus) {
       return (
-        <Login setAccountInfo={setAccountInfo} setLoginStatus={setLoginStatus} setState={setState} />
+        <Login
+          setAccountInfo={setAccountInfo}
+          setLoginStatus={setLoginStatus}
+          setState={setState}
+        />
       );
     }
     return (
@@ -82,10 +86,15 @@ function App() {
         <div className="flex flex-1 flex-col-reverse overflow-y-auto">
           <Chat chat={chat} state={state} />
         </div>
-        <Input onTextChange={onTextChange} onMessageSubmit={onMessageSubmit} message={state.message} />
+        <Input
+          onTextChange={onTextChange}
+          onMessageSubmit={onMessageSubmit}
+          message={state.message}
+        />
       </div>
     );
   };
+
   return (
     <div>
       {ifAuthenticated()}

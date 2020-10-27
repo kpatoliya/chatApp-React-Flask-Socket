@@ -6,7 +6,7 @@ interface InputType {
     message: string
 }
 
-const Input: React.FC<InputType> = ({ onTextChange, onMessageSubmit, message }) => {
+const Input: React.FC<InputType> = ({ onTextChange, onMessageSubmit, message }: InputType) => {
   const onSubmit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     if (message !== '') {
       onMessageSubmit(e);

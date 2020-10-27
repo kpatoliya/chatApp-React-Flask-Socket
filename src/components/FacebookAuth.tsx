@@ -16,7 +16,9 @@ interface FacebookAuthType {
     setState: (e: SingleChatType) => void
 }
 
-const FacebookAuth:React.FC<FacebookAuthType> = ({ setAccountInfo, setLoginStatus, setState }) => {
+const FacebookAuth:React.FC<FacebookAuthType> = (
+  { setAccountInfo, setLoginStatus, setState }: FacebookAuthType,
+) => {
   const responseFacebook = (response: any) => {
     setLoginStatus(false);
     setState({ name: response.name, message: '' });
