@@ -31,8 +31,8 @@ class MockedTestCase(unittest.TestCase):
     """Class for mocking all unit test"""
     def test_bot_getWeather(self):
         """function to mock weather"""
-        with mock.patch('json.loads') as mock_search:
-            mock_search.return_value = {
+        with mock.patch('requests.get') as mock_search:
+            mock_search.return_value.json.return_value = {
                 "weather": [{
                     "description": "mist",
                     "icon": "50d"
@@ -45,16 +45,16 @@ class MockedTestCase(unittest.TestCase):
             expected = "<h4>clifton: 54.52°F" \
                        "<img src='http://openweathermap.org/img/w/50d.png'>mist</h4>"
             self.assertEqual(Bot('clifton').getWeather(), expected)
-        with mock.patch('json.loads') as mock_search:
-            mock_search.return_value = {
+        with mock.patch('requests.get') as mock_search:
+            mock_search.return_value.json.return_value = {
                 "cod": 400}
             expected = "Invalid Input!!"
             self.assertEqual(Bot('random').getWeather(), expected)
 
     def test_bot_getGif(self):
         """function to get gif"""
-        with mock.patch('json.loads') as mock_search:
-            mock_search.return_value = {
+        with mock.patch('requests.get') as mock_search:
+            mock_search.return_value.json.return_value = {
                 "data": [{
                     "images": {
                         "downsized": {
@@ -68,8 +68,8 @@ class MockedTestCase(unittest.TestCase):
             }
             expected = "<h4> <img src='https://www.gif.com' width='250' height='250'> </h4>"
             self.assertEqual(Bot('random').getGif(), expected)
-        with mock.patch('json.loads') as mock_search:
-            mock_search.return_value = {
+        with mock.patch('requests.get') as mock_search:
+            mock_search.return_value.json.return_value = {
                 "pagination": {
                     "total_count": 0
                 }
@@ -79,8 +79,8 @@ class MockedTestCase(unittest.TestCase):
 
     def test_bot_funTranslate(self):
         """function to mock funtranslate"""
-        with mock.patch('json.loads') as mock_search:
-            mock_search.return_value = {
+        with mock.patch('requests.get') as mock_search:
+            mock_search.return_value.json.return_value = {
                 "contents": {
                     "translated": 'This is translated message'
                 }
@@ -90,8 +90,8 @@ class MockedTestCase(unittest.TestCase):
 
     def test_bot_genRandomJoke(self):
         """function to mock joke"""
-        with mock.patch('json.loads') as mock_search:
-            mock_search.return_value = {
+        with mock.patch('requests.get') as mock_search:
+            mock_search.return_value.json.return_value = {
                 "joke": 'generated random joke'
             }
             expected = "generated random joke"

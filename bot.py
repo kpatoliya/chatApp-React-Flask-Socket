@@ -18,10 +18,9 @@ class Bot:
         """function to get weather"""
         if self.string == 'Please enter city name!!':
             return self.string
-        content = json.loads(requests.get(
+        content = requests.get(
             'http://api.openweathermap.org/data/2.5/weather?q=' + self.string +
-            '&units=imperial&appid=' + WEATHER_API_KEY).text)
-
+            '&units=imperial&appid=' + WEATHER_API_KEY).json()
         if content['cod'] != 200:
             return 'Invalid Input!!'
         temperature = content['main']['temp']
@@ -35,9 +34,9 @@ class Bot:
         """function to get gif"""
         if self.string == 'Please enter valid query!!':
             return self.string
-        content = json.loads(requests.get(
+        content = requests.get(
             'https://api.giphy.com/v1/gifs/search?api_key=' + GIPHY_API_KEY +
-            '&q=' + self.string + '&limit=1&offset=0&rating=r&lang=en').text)
+            '&q=' + self.string + '&limit=1&offset=0&rating=r&lang=en').json()
 
         if content['pagination']['total_count'] < 1:
             return 'Invalid Input!!'
@@ -48,9 +47,9 @@ class Bot:
         """function to get funtranslate"""
         if self.string == 'Please enter text to translate!!':
             return self.string
-        content = json.loads(requests.get(
+        content = requests.get(
             'https://api.funtranslations.com/translate/emoji.json?text='
-            + self.string).text)
+            + self.string).json()
 
         retString = content['contents']['translated']
         return retString
@@ -66,8 +65,8 @@ class Bot:
     @staticmethod
     def genRandomJoke():
         """function to get joke"""
-        content = json.loads(requests.get(
-            'https://sv443.net/jokeapi/v2/joke/Programming?type=single').text)
+        content = requests.get(
+            'https://sv443.net/jokeapi/v2/joke/Programming?type=single').json()
         return content['joke']
 
     @staticmethod
