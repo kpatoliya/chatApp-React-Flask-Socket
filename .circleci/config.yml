@@ -1,0 +1,31 @@
+version: 2.1
+
+orbs:
+  python: circleci/python@0.2.1
+  heroku: circleci/heroku@0.0.10
+
+jobs:
+  build-and-test:
+    executor: python/default
+    steps:
+      - checkout
+      - python/load-cache
+      - python/install-deps
+      - python/save-cache
+      - run:
+          command: python ./tests/unmocked_unit_tests.py
+          name: Unmocked Tests
+      - run:
+          command: python ./tests/mocked_unit_tests.py
+          name: Mocked Tests
+
+workflows:
+  heroku_deploy:
+    jobs:
+      - build-and-test
+      - heroku/deploy-via-git: # Use the pre-configured job, deploy-via-git
+          requires:
+            - build-and-test
+          filters:
+            branches:
+              only: main
