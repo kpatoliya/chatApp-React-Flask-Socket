@@ -51,10 +51,10 @@ class MockedTestCase(unittest.TestCase):
             expected = "Invalid Input!!"
             self.assertEqual(Bot('random').getWeather(), expected)
 
+
     def test_bot_getGif(self):
         """function to get gif"""
-        with mock.patch('requests.get') as mock_search:
-            mock_search.return_value.json.return_value = {
+        response = {
                 "data": [{
                     "images": {
                         "downsized": {
@@ -66,8 +66,12 @@ class MockedTestCase(unittest.TestCase):
                     "total_count": 2
                 }
             }
+        with mock.patch('requests.get') as mock_search:
+            mock_search.return_value.json.return_value = response
             expected = "<h4> <img src='https://www.gif.com' width='250' height='250'> </h4>"
-            self.assertEqual(Bot('random').getGif(), expected)
+            funcResponse = Bot('random').getGif()
+            print(funcResponse)
+            self.assertEqual(funcResponse, expected)
         with mock.patch('requests.get') as mock_search:
             mock_search.return_value.json.return_value = {
                 "pagination": {

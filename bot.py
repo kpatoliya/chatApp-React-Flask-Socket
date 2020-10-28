@@ -5,9 +5,9 @@ import requests
 from dotenv import load_dotenv
 
 load_dotenv()
-WEATHER_API_KEY = os.getenv('WEATHER_API')
-GIPHY_API_KEY = os.getenv('GIPHY_API')
-
+# WEATHER_API_KEY = os.getenv('WEATHER_API')
+GIPHY_API_KEY = os.getenv('GIPHY_API', '')
+WEATHER_API_KEY = os.getenv('WEATHER_API', '')
 
 class Bot:
     """This is a function to handle messages for bot"""
@@ -18,6 +18,7 @@ class Bot:
         """function to get weather"""
         if self.string == 'Please enter city name!!':
             return self.string
+
         content = requests.get(
             'http://api.openweathermap.org/data/2.5/weather?q=' + self.string +
             '&units=imperial&appid=' + WEATHER_API_KEY).json()
