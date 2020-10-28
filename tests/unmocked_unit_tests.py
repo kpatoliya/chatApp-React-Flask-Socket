@@ -9,6 +9,7 @@ import models
 
 
 class UnmockedTestCase(unittest.TestCase):
+    """class for unmocked"""
     def setUp(self):
         self.user = models.Messages('karan', 'test message', 'karan@gmail.com', 'profilepic.com')
 
@@ -38,7 +39,8 @@ class UnmockedTestCase(unittest.TestCase):
         self.assertEqual(Bot.botAbout(), expected)
 
     def test_bot_renderImage(self):
-        expected = "<h4> <img src='" + 'https://www.picture.jpg' + "' width='250' height='250'> </h4>"
+        expected = "<h4> <img src='" + \
+                   'https://www.picture.jpg' + "' width='250' height='250'> </h4>"
         self.assertEqual(Bot('https://www.picture.jpg').renderImage(), expected)
 
     def test_bot_renderLink(self):
