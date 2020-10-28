@@ -1,6 +1,10 @@
 """mocked_unit_tests.py"""
+import sys
+import os
 import unittest
 import unittest.mock as mock
+sys.path.insert(1, os.getcwd())
+
 from bot import Bot
 import models
 from server import socketio, app, handle_message

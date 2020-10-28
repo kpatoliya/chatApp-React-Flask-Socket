@@ -1,5 +1,9 @@
 """unmocked_unit_tests.py"""
 import unittest
+import sys
+import os
+
+sys.path.insert(1, os.getcwd())
 from bot import Bot
 import models
 
