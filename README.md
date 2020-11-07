@@ -1,6 +1,5 @@
 
-# Welcome to ChatApp
- 
+# Welcome to ChatApp 
 
 ## Requirements
 - NodeJS 12.14 (minimum)
@@ -12,7 +11,7 @@
 
 ## Installation
 #### Clone this repository
-https://github.com/NJIT-CS490/project2-m1-kmp87
+```https://github.com/kpatoliya/chatApp-React-Flask-Socket```
 
 #### Installation
 Run the following commands to install the required library and tools for this project.
@@ -60,13 +59,36 @@ Paste this Client ID in file FacebookAuth.tsx<br/>
     ```
     This will start the server on http://localhost:4000.
     
-- Running docker for database
+- Running docker for database (optional)
     ```
     docker-compose up 
    ```
   This command would spin up the the container that has our database.
   
+- Database setup locally
 
+    This web application uses `psql` as the database to provide persistence with the bulletin boards. In order to get psql to work with python, run the following commands:
+    1. `sudo yum update`, say yes for all the prompts.
+    2. `sudo pip install --upgrade pip`
+    3. `sudo pip install psycopg2-binary`
+    4. `sudo pip install Flask-SQLAlchemy==2.1`
+    
+    If you have not already created a psql database, follow these steps in order to initialize one.
+    
+    1. `sudo yum install postgresql postgresql-server postgresql-devel postgresql-contrib postgresql-docs`, Enter yes to all prompts.    
+    2. `sudo service postgresql initdb`  
+    3. `sudo service postgresql start`    
+    4. Make a new superuser: `sudo -u postgres createuser --superuser $USER` 
+    5. Make a new database: `sudo -u postgres createdb $USER`   
+    6. Make sure your user shows up and make a new one:    
+        1. `psql`    
+        2. `\du` look for yourself as a user    
+        3. `\l` look for yourself as a database 
+        4. `create user [some_username_here] superuser password '[password]';` 
+        5. Make sure you remember the quotes around password and the semicolon. 
+            1. Check `\du` to ensure it worked.
+        6. `\q` to quit out of psql
+        
 ## Deploy to Heroku
 - Follow this [step](https://devcenter.heroku.com/articles/creating-apps) to create a project in Heroku
 - Procfile is the configuration needed for Heroku.
@@ -74,36 +96,25 @@ Paste this Client ID in file FacebookAuth.tsx<br/>
 - To deploy your application, [follow this](https://devcenter.heroku.com/articles/git)
 - Set ```WEATHER_API``` & ```GIPHY_API``` Config Variable in your Heroku app's console.
 
- ## Issues
- - I was using ```@socketio.on('connect')``` initially which didn't allow me to get email from auth login and using other method 
-    was making duplicate codes which was redundant, so I ended up replacing the method with ```@socketio.on('update_total_users')```
-    and emitting from auth component so that every time login is successful the state get set to updated values. 
-     
- - I was having the issue of input field not setting as required even after explicitly defining the input tag as required
-    so I solved this issue by handling the function that is called at the time of submit.
-    ```
-    if(message !== ''){
-            onMessageSubmit(e)
-        }
-    ```
- - Displaying gif and image when user inputs the link was displaying image with variable size. So I made this easy 
- using the this library `html-react-parser`. With this library I can just explicitly mention size of the image tag like
- ```<img src='" + giphy + "' width='250' height='250'>``` and return to frontend. 
- I used this [documentation](https://www.npmjs.com/package/html-react-parser) to solve this issue.
- 
-  
- ## Known Problems
- - None
- 
- ## Improvements
- - If I had more time I would have added search box in the app to add the functionality of searching a term in the chat.
- I found a good article on steps to implement this feature which could 
- be found at this [link](https://www.iamtimsmith.com/blog/lets-build-a-search-bar-in-react/).
- - I could have added timestamp for each message displayed and also stored in database which could useful 
- to search or group messages according to the time. I would have added a new column named timestamp to store the time 
- when message was created, this would always load the timestamp as it is rendered with other infromation from the database.
+## Linting
+If you wish to check the linting on this project, execute the following commands.
+1. `pip install pylint`
+2. `pip install black`
+3. `npm install -g eslint`
+4. `eslint --init`, select the following options.
+	1. "To check syntax, find problems, and enforce code style"
+	2. "Javascript modules (import/export)"
+	3. "React"
+	4. "No"
+	5. "Browser"
+	6. "Use a popular style guide"
+	7. "Airbnb"
+	8. "Javascript"
+	9. When asked if you want to install dependencies with npm, say "Yes"
+5. Run `eslint scripts/[FILE]` on any of the `.js/.jsx`  files in the scripts directory.
+	1.  Run `eslint --fix scripts/[FILE]` in order to automatically fix some of the linting errors
+6. Run `pylint [FILE]` on any of the python files.
 
- 
 ## Available Scripts
 ### `npm build`
 
