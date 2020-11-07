@@ -20,14 +20,14 @@
 .idea
 
 .env
-
+.coverage
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
 static
 public
-
+htmlcov
 src/styles/chat.css
 postgres-data
 __pycache__
